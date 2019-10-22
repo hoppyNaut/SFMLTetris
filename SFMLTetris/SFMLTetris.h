@@ -4,6 +4,9 @@
 
 #include<SFML/Graphics.hpp>
 #include<SFML/Audio.hpp>
+#include<string>
+
+using namespace std;
 
 #define STAGE_WIDTH 20			//舞台宽度
 #define STAGE_HEIGHT 30			//舞台高度
@@ -12,6 +15,7 @@
 #define GRIDSIZE 25						//纹理尺寸
 #define SCALE	1.5625						//纹理缩放
 #define INFO_WIDTH 500			//信息窗宽度	
+#define SpriteNum 8	
 
 using namespace sf;
 
@@ -27,6 +31,11 @@ enum eColor {
 	WHITE = 1,
 	RED = 2,
 	GREEN = 3,
+	BLUE = 4,
+	DARKBLUE = 5,
+	ORANGE = 6,
+	PURPLE = 7,
+	YELLOW = 8,
 };
 
 class SFMLTetris
@@ -65,12 +74,19 @@ private:
 	int timeCounter;		//计时器
 	int scoreCount;
 
-	Texture tWhite;		//纹理对象
-	Sprite spWhite;		//精灵对象
-	Texture tGreen;
-	Sprite spGreen;
-	Texture tRed;
-	Sprite spRed;
+	//Texture tWhite;		//纹理对象
+	//Sprite spWhite;		//精灵对象
+	//Texture tGreen;
+	//Sprite spGreen;
+	//Texture tRed;
+	//Sprite spRed;
+
+	Texture tArray[8];	//纹理对象数组
+	Sprite spArray[8];	//精灵对象数组
+
+	string texturePath[8] = { "Images/white.png","Images/red.png" ,"Images/green.png" ,
+		"Images/blue.png" ,"Images/darkblue.png" ,"Images/orange.png" ,"Images/purple.png","Images/yellow.png" };
+
 	Font font;						//字体对象
 	Text text;						//文本对象
 
@@ -92,7 +108,7 @@ private:
 	void Draw();							//绘制
 	void Input();							//获取输入
 	void Logic();							//逻辑处理 
-	void SetShape(int &cshape, int shape[][4], int &size_w, int &size_h);		//设置方块形状
+	void SetShape(int &cshape, int shape[][4], int &size_w, int &size_h,eColor & color);		//设置方块形状
 	void Judge();							//判断是否有可以消的行
 	void Rotate();							//旋转方块
 	bool IsAggin();						//判断方块的下一次移动是否会越界或重合

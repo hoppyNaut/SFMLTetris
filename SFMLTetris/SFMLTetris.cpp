@@ -19,7 +19,7 @@ int SFMLTetris::GetRand(int min, int max)
 
 void SFMLTetris::Initial()
 {
-
+	
 	//数据初始化
 	score = 0;
 	scoreCount = 1;
@@ -57,30 +57,23 @@ void SFMLTetris::Initial()
 	text.setFont(font);
 
 	//加载纹理图片
-	if (!tWhite.loadFromFile("Images/white.png"))
+	for (int i = 0; i < SpriteNum; i++)
 	{
-		std::cout << "图片whilte.png没有找到" << std::endl;
+		Texture tempTexture;
+		Sprite tempSprite;
+		tArray[i] = tempTexture;
+		spArray[i] = tempSprite;
 	}
 
-	if (!tGreen.loadFromFile("Images/green.png"))
+	for (int i = 0; i < SpriteNum; i++)
 	{
-		std::cout << "图片green.png没有找到" << std::endl;
+		if (!tArray[i].loadFromFile(texturePath[i]))
+		{
+			std::cout << "图片" <<  texturePath[i] <<"没有找到" << std::endl;
+		}
+		spArray[i].setTexture(tArray[i]);
+		spArray[i].setScale(SCALE, SCALE);
 	}
-
-	if (!tRed.loadFromFile("Images/red.png"))
-	{
-		std::cout << "图片red.png没有找到" << std::endl;
-	}
-
-	//设置精灵对象的纹理
-	spWhite.setTexture(tWhite);
-	spGreen.setTexture(tGreen);
-	spRed.setTexture(tRed);
-
-	//设置精灵对象的缩放
-	spWhite.setScale(SCALE, SCALE);
-	spGreen.setScale(SCALE, SCALE);
-	spRed.setScale(SCALE, SCALE);
 
 	//加载音乐
 	if (!sbDrop.loadFromFile("Audios/Drop1.ogg"))
@@ -109,16 +102,13 @@ void SFMLTetris::Initial()
 
 	srand((unsigned int)time(0));		//生成随机数种子
 
-	cur_color = (eColor)GetRand(1, 3);
-	next_color = (eColor)GetRand(1, 3);
-
 	//生成第一个方块
 	shape = GetRand(0, 6);
-	SetShape(shape, box_shape, size_w, size_h);
+	SetShape(shape, box_shape, size_w, size_h,cur_color);
 
 	//生成下一个方块
 	next_shape = GetRand(0, 6);
-	SetShape(next_shape, next_box_shape, next_size_w, next_size_h);
+	SetShape(next_shape, next_box_shape, next_size_w, next_size_h,next_color);
 }
 
 void SFMLTetris::Draw()
@@ -130,21 +120,28 @@ void SFMLTetris::Draw()
 	for(int i = 0; i < width; i++)
 		for (int j = 0; j < height; j++)
 		{
-			if (box_map[j][i] == 1)
+			//if (box_map[j][i] == 1)
+			//{
+			//	spWhite.setPosition(i * GRIDSIZE, j * GRIDSIZE);
+			//	window.draw(spWhite);
+			//}
+			//else if (box_map[j][i] == 2)
+			//{
+			//	spRed.setPosition(i * GRIDSIZE, j * GRIDSIZE);
+			//	window.draw(spRed);
+			//}
+			//else if (box_map[j][i] == 3)
+			//{
+			//	spGreen.setPosition(i * GRIDSIZE, j * GRIDSIZE);
+			//	window.draw(spGreen);
+			//}
+			if (box_map[j][i] > 0)
 			{
-				spWhite.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-				window.draw(spWhite);
+				Sprite curSprite = spArray[box_map[j][i] - 1];
+				curSprite.setPosition(i * GRIDSIZE, j * GRIDSIZE);
+				window.draw(curSprite);
 			}
-			else if (box_map[j][i] == 2)
-			{
-				spRed.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-				window.draw(spRed);
-			}
-			else if (box_map[j][i] == 3)
-			{
-				spGreen.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-				window.draw(spGreen);
-			}
+
 		}
 
 	for(int i = 0;i < size_h; i++)
@@ -152,7 +149,7 @@ void SFMLTetris::Draw()
 		{
 			if (box_shape[i][j] == 1)
 			{
-				switch (cur_color)
+				/*switch (cur_color)
 				{
 				case WHITE:
 					spWhite.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
@@ -168,7 +165,10 @@ void SFMLTetris::Draw()
 					break;
 				default:
 					break;
-				}
+				}*/
+				Sprite curSprite = spArray[cur_color - 1];
+				curSprite.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
+				window.draw(curSprite);
 			}
 		}
 
@@ -344,23 +344,6 @@ void SFMLTetris::Logic()
 			}
 		//生成下一个方块
 		Score_Next();
-		//head_y++;
-		//if (IsAggin())
-		//{
-		//	
-		//	head_y--;
-		//	for (int i = 0; i < size_h; i++)
-		//		for (int j = 0; j < size_w; j++)
-		//		{
-		//			if (box_shape[i][j] == 1)
-		//			{
-		//				//box_map[head_y + i][head_x + j] = 1;
-		//				box_map[head_y + i][head_x + j] = (int)cur_color;
-		//			}
-		//		}
-		//	//生成下一个方块
-		//	Score_Next();
-		//}
 	}
 }
 
@@ -433,7 +416,7 @@ void SFMLTetris::Prompt_info(int x, int y)
 
 }
 
-void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size_h)
+void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size_h,eColor &color)
 {
 	//初始化当前形状数组
 	int i, j;
@@ -456,6 +439,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[0][1] = 1;
 		shape[0][2] = 1;
 		shape[0][3] = 1;
+		color = RED;
 		break;
 		//L形
 	case 1:
@@ -465,6 +449,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[1][0] = 1;
 		shape[1][1] = 1;
 		shape[1][2] = 1;
+		color = GREEN;
 		break;
 		//J形
 	case 2:
@@ -474,6 +459,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[1][0] = 1;
 		shape[1][1] = 1;
 		shape[1][2] = 1;
+		color = BLUE;
 		break;
 		//Z形
 	case 3:
@@ -483,6 +469,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[0][2] = 1;
 		shape[1][0] = 1;
 		shape[1][1] = 1;
+		color = DARKBLUE;
 		break;
 		//S形
 	case 4:
@@ -492,6 +479,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[0][1] = 1;
 		shape[1][1] = 1;
 		shape[1][2] = 1;
+		color = ORANGE;
 		break;
 		//O形
 	case 5:
@@ -501,6 +489,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[0][1] = 1;
 		shape[1][0] = 1;
 		shape[1][1] = 1;
+		color = PURPLE;
 		break;
 		//T形
 	case 6:
@@ -510,6 +499,7 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 		shape[1][0] = 1;
 		shape[1][1] = 1;
 		shape[1][2] = 1;
+		color = YELLOW;
 		break;
 	}
 
@@ -685,13 +675,13 @@ void SFMLTetris::Score_Next()
 	}
 
 	//将下一个方块的信息赋给当前方块
-	SetShape(next_shape, box_shape, size_w, size_h);
-	cur_color = next_color;
+	SetShape(next_shape, box_shape, size_w, size_h,cur_color);
+	//cur_color = next_color;
 
 	//重新生成下一个方块
-	next_color = (eColor)GetRand(1, 3);
+	//next_color = (eColor)GetRand(1, 3);
 	next_shape = GetRand(0, 6); 
-	SetShape(next_shape, next_box_shape, next_size_w, next_size_h);
+	SetShape(next_shape, next_box_shape, next_size_w, next_size_h,next_color);
 }
 
 void SFMLTetris::ShowNext(int x,int y)
@@ -701,7 +691,7 @@ void SFMLTetris::ShowNext(int x,int y)
 		{
 			if (next_box_shape[i][j] == 1)
 			{
-				switch (next_color)
+				/*switch (next_color)
 				{
 				case WHITE:
 					spWhite.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
@@ -717,7 +707,10 @@ void SFMLTetris::ShowNext(int x,int y)
 					break;
 				default:
 					break;
-				}
+				}*/
+				Sprite nextSprite = spArray[next_color - 1];
+				nextSprite.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
+				window.draw(nextSprite);
 			}
 		}
 }
