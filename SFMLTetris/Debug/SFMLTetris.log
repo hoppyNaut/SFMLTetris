@@ -1,0 +1,32 @@
+﻿  Main.cpp
+  SFMLTetris.cpp
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(106): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(135): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(140): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(145): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(158): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(162): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(166): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(376): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(381): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(386): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(391): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(396): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(401): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(406): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(411): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(417): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(429): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(439): warning C4101: “j”: 未引用的局部变量
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(439): warning C4101: “i”: 未引用的局部变量
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(707): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(711): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(715): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(734): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(738): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(751): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(763): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(768): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+d:\游戏程序设计\sfmltetris\sfmltetris\sfmltetris\sfmltetris.cpp(804): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+  正在生成代码...
+  SFMLTetris.vcxproj -> D:\游戏程序设计\SFMLTetris\SFMLTetris\Debug\SFMLTetris.exe
