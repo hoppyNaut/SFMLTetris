@@ -19,7 +19,8 @@ int SFMLTetris::GetRand(int min, int max)
 
 void SFMLTetris::Initial()
 {
-	
+	srand((unsigned int)time(0));		//生成随机数种子
+
 	//数据初始化
 	score = 0;
 	scoreCount = 1;
@@ -30,6 +31,8 @@ void SFMLTetris::Initial()
 	gameQuit = false;
 	soundVolume = 50;
 	musicOn = true;
+	//随机获得一张背景
+	bgIndex = GetRand(0, SpriteBgNum - 1);
 
 	for (int i = 0; i < height; i++)
 	{
@@ -46,9 +49,29 @@ void SFMLTetris::Initial()
 		}
 	}
 
-	window.setFramerateLimit(frameRate);	//设置每秒的帧数
+	//生成第一个方块
+	shape = GetRand(0, 6);
+	SetShape(shape, box_shape, size_w, size_h,cur_color);
 
-	
+	//生成下一个方块
+	next_shape = GetRand(0, 6);
+	SetShape(next_shape, next_box_shape, next_size_w, next_size_h,next_color);
+
+	//加载素材
+	LoadMediaData();
+
+	//设置背景音乐
+	bgMusic.setVolume(soundVolume);
+	bgMusic.play();
+	bgMusic.setLoop(true);
+
+	//设置每秒的帧数
+	window.setFramerateLimit(frameRate);	
+}
+
+void SFMLTetris::LoadMediaData()
+{
+
 	//加载字体
 	if (!font.loadFromFile("Fonts/fangmeng.ttf"))
 	{
@@ -57,7 +80,7 @@ void SFMLTetris::Initial()
 	text.setFont(font);
 
 	//加载纹理图片
-	for (int i = 0; i < SpriteNum; i++)
+	for (int i = 0; i < SpriteTetrisNum; i++)
 	{
 		Texture tempTexture;
 		Sprite tempSprite;
@@ -65,15 +88,23 @@ void SFMLTetris::Initial()
 		spArray[i] = tempSprite;
 	}
 
-	for (int i = 0; i < SpriteNum; i++)
+	for (int i = 0; i < SpriteTetrisNum; i++)
 	{
-		if (!tArray[i].loadFromFile(texturePath[i]))
+		if (!tArray[i].loadFromFile(textureTetrisPath[i]))
 		{
-			std::cout << "图片" <<  texturePath[i] <<"没有找到" << std::endl;
+			std::cout << "图片" << textureTetrisPath[i] << "没有找到" << std::endl;
 		}
 		spArray[i].setTexture(tArray[i]);
 		spArray[i].setScale(SCALE, SCALE);
 	}
+
+	//加载背景纹理图片
+	if (!tBackground.loadFromFile(textureBgPath[bgIndex]))
+	{
+		std::cout << "图片" + textureBgPath[bgIndex] + "没有找到" << std::endl;
+	}
+	spBackground.setTexture(tBackground);
+	spBackground.setScale(BGSCALEX, BGSCALEY);
 
 	//加载音乐
 	if (!sbDrop.loadFromFile("Audios/Drop1.ogg"))
@@ -95,46 +126,21 @@ void SFMLTetris::Initial()
 
 	soundDrop.setBuffer(sbDrop);
 	soundAppear.setBuffer(sbAppear);
-
-	bgMusic.setVolume(soundVolume);
-	bgMusic.play();
-	bgMusic.setLoop(true);
-
-	srand((unsigned int)time(0));		//生成随机数种子
-
-	//生成第一个方块
-	shape = GetRand(0, 6);
-	SetShape(shape, box_shape, size_w, size_h,cur_color);
-
-	//生成下一个方块
-	next_shape = GetRand(0, 6);
-	SetShape(next_shape, next_box_shape, next_size_w, next_size_h,next_color);
 }
 
 void SFMLTetris::Draw()
 {
 	window.clear(Color::Color(255, 0, 255, 255));		//清屏
 
+	spBackground.setPosition(0, 0);
+	window.draw(spBackground);
+
 	Prompt_info(width * GRIDSIZE, GRIDSIZE);
+
 
 	for(int i = 0; i < width; i++)
 		for (int j = 0; j < height; j++)
 		{
-			//if (box_map[j][i] == 1)
-			//{
-			//	spWhite.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-			//	window.draw(spWhite);
-			//}
-			//else if (box_map[j][i] == 2)
-			//{
-			//	spRed.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-			//	window.draw(spRed);
-			//}
-			//else if (box_map[j][i] == 3)
-			//{
-			//	spGreen.setPosition(i * GRIDSIZE, j * GRIDSIZE);
-			//	window.draw(spGreen);
-			//}
 			if (box_map[j][i] > 0)
 			{
 				Sprite curSprite = spArray[box_map[j][i] - 1];
@@ -149,23 +155,6 @@ void SFMLTetris::Draw()
 		{
 			if (box_shape[i][j] == 1)
 			{
-				/*switch (cur_color)
-				{
-				case WHITE:
-					spWhite.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
-					window.draw(spWhite);
-					break;
-				case RED:
-					spRed.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
-					window.draw(spRed);
-					break;
-				case GREEN:
-					spGreen.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
-					window.draw(spGreen);
-					break;
-				default:
-					break;
-				}*/
 				Sprite curSprite = spArray[cur_color - 1];
 				curSprite.setPosition((j + head_x) * GRIDSIZE, (i + head_y) * GRIDSIZE);
 				window.draw(curSprite);
@@ -247,32 +236,6 @@ void SFMLTetris::Input()
 		//	}
 		//}
 	}
-
-	//if (Keyboard::isKeyPressed(Keyboard::Left))
-	//{
-	//	dir = LEFT;
-	//}
-
-	//if (Keyboard::isKeyPressed(Keyboard::Right))
-	//{
-	//	dir = RIGHT;
-	//}
-
-	//if (Keyboard::isKeyPressed(Keyboard::Up))
-	//{
-	//	dir = UP;
-	//}
-
-	//if (Keyboard::isKeyPressed(Keyboard::Down))
-	//{
-	//	dir = DOWN;
-	//}
-
-	//if (Keyboard::isKeyPressed(Keyboard::X))
-	//{
-	//	gameOver = true;
-	//	gameQuit = true;
-	//}
 }
 
 void SFMLTetris::Logic()
@@ -661,7 +624,7 @@ void SFMLTetris::Score_Next()
 	score += 10;
 	Judge();
 
-	if (score >= scoreCount * 100 )
+	if (score >= scoreCount * 200 )
 	{
 		scoreCount++;
 		if (frameRate < 50)
@@ -792,7 +755,7 @@ void SFMLTetris::GameLoop()
 			
 			Draw();
 		}
-
+		//更换音乐
 		bgMusic.stop();
 		failMusic.setVolume(soundVolume);
 		failMusic.play();

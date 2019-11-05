@@ -14,8 +14,11 @@ using namespace std;
 #define WINDOW_HEIGHT 25		//窗口高度
 #define GRIDSIZE 25						//纹理尺寸
 #define SCALE	1.5625						//纹理缩放
+#define BGSCALEX 0.78125
+#define BGSCALEY 0.7324
 #define INFO_WIDTH 500			//信息窗宽度	
-#define SpriteNum 8	
+#define SpriteTetrisNum 8	
+#define SpriteBgNum 2
 
 using namespace sf;
 
@@ -81,11 +84,16 @@ private:
 	//Texture tRed;
 	//Sprite spRed;
 
-	Texture tArray[8];	//纹理对象数组
-	Sprite spArray[8];	//精灵对象数组
+	Texture tArray[8];	//方块纹理对象数组
+	Sprite spArray[8];	//方块精灵对象数组
 
-	string texturePath[8] = { "Images/white.png","Images/red.png" ,"Images/green.png" ,
-		"Images/blue.png" ,"Images/darkblue.png" ,"Images/orange.png" ,"Images/purple.png","Images/yellow.png" };
+	string textureTetrisPath[8] = { "Images/Tetris/white.png","Images/Tetris/red.png" ,"Images/Tetris/green.png" ,"Images/Tetris/blue.png" ,
+		"Images/Tetris/darkblue.png" ,"Images/Tetris/orange.png" ,"Images/Tetris/purple.png","Images/Tetris/yellow.png" };
+
+	Texture tBackground;
+	Sprite spBackground;
+	string textureBgPath[2] = { "Images/Bg/BgStar.png","Images/Bg/BgSky.png" };
+	int bgIndex = 0;
 
 	Font font;						//字体对象
 	Text text;						//文本对象
@@ -105,6 +113,7 @@ public:
 private:
 	int GetRand(int min, int max);//生成位于[min,max]之间的随机数
 	void Initial();							//初始化
+	void LoadMediaData();			//加载素材文件
 	void Draw();							//绘制
 	void Input();							//获取输入
 	void Logic();							//逻辑处理 
