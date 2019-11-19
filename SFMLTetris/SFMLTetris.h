@@ -2,9 +2,16 @@
 #ifndef TETRIS_H
 #define TETRIS_H
 
+#include"tinyxml.h"
+#include "button.h"
 #include<SFML/Graphics.hpp>
 #include<SFML/Audio.hpp>
+#include <windows.h>
+#include <iostream>
+#include <sstream>
 #include<string>
+#include<vector>
+#include <regex>
 
 using namespace std;
 
@@ -41,6 +48,27 @@ enum eColor {
 	YELLOW = 8,
 };
 
+class Question {
+public:
+	string quesTxt;
+	string optionA;
+	string optionB;
+	string optionC;
+	string optionD;
+	int answer;
+};
+
+class WQuestion
+{
+public:
+	wstring quesTxt;
+	wstring optionA;
+	wstring optionB;
+	wstring optionC;
+	wstring optionD;
+	int answer;
+};
+
 class SFMLTetris
 {
 private:
@@ -66,6 +94,7 @@ private:
 	int next_box_shape[4][4];	//下一个方块形状的4*4数组
 
 	int box_map[STAGE_HEIGHT][STAGE_WIDTH];	//游戏框内的box
+	int box_Right[4][4];	//右侧游戏框
 
 	bool gameOver;
 	bool gameQuit;
@@ -77,12 +106,6 @@ private:
 	int timeCounter;		//计时器
 	int scoreCount;
 
-	//Texture tWhite;		//纹理对象
-	//Sprite spWhite;		//精灵对象
-	//Texture tGreen;
-	//Sprite spGreen;
-	//Texture tRed;
-	//Sprite spRed;
 
 	Texture tArray[8];	//方块纹理对象数组
 	Sprite spArray[8];	//方块精灵对象数组
@@ -95,14 +118,38 @@ private:
 	string textureBgPath[2] = { "Images/Bg/BgStar.png","Images/Bg/BgSky.png" };
 	int bgIndex = 0;
 
+	Texture tAward,tAwardGray;
+	Sprite spAward,spAwardGray;
+	string textureAwardPath = "Images/award.png";
+	string textureAwardGrayPath = "Images/awardgray.png";
+
 	Font font;						//字体对象
 	Text text;						//文本对象
 
-	SoundBuffer sbDrop, sbAppear;		//音效缓冲
-	Sound soundDrop, soundAppear;	//音效
+	SoundBuffer sbDrop, sbAppear,sbClickCorrect,sbClickFalse;		//音效缓冲
+	Sound soundDrop, soundAppear,soundClickCorrect,soundClickFalse;	//音效
 	Music bgMusic, failMusic;	//背景音乐
 	int soundVolume;				//背景音乐音量
 	bool musicOn;					//背景音乐开关
+
+	//按钮
+	button * btn_optionA;
+	button * btn_optionB;
+	button * btn_optionC;
+	button * btn_optionD;
+
+	//问题数组
+	Question questionArray[50];
+	WQuestion wquestionArray[50];
+	//当前问题
+	Question curQuestion;
+	WQuestion curWQuestion;
+	//当前问题的答案 1——A；2——B；3——C；4——D
+	int curAnswer;
+	int questionIndex;
+
+	//记录奖励数
+	int awardCount;
 
 public:
 	SFMLTetris();
@@ -116,6 +163,7 @@ private:
 	void LoadMediaData();			//加载素材文件
 	void Draw();							//绘制
 	void Input();							//获取输入
+	void ButtonInput(sf::Event event);					//按钮输入处理
 	void Logic();							//逻辑处理 
 	void SetShape(int &cshape, int shape[][4], int &size_w, int &size_h,eColor & color);		//设置方块形状
 	void Judge();							//判断是否有可以消的行
@@ -124,13 +172,29 @@ private:
 	bool Exsqr(int row);				//判断当前行是否为空
 	void Score_Next();					//生成下一个方块
 	void ShowNext(int x, int y);		//显示下一个方块
+	void EliminateRandRow();	//随机消除一行
+	void EliminateLongestRow();		//消除元素最多的一行
 	void Prompt_info(int x, int y);	//提示信息
 	void ShowGameOverInfo(int x, int y);		//显示游戏结束信息
 	void ShowSpeedUpInfo(int x, int y);			//显示加速提示
+	void DrawBtn();
+	void DrawAward();
 	void ControlMusic(Music &music, sf::Event event);	//控制背景音乐
+
+	bool LoadXmlFile();	//读取对应的xml文本文件
+	string Utf8ToUnicode(const char * szU8);	//将utf-8编码转换成Unicode，解决中文字符乱码
+	string Wchar_tToString(wchar_t *wchar);
+	wstring Utf8ToUnicodeW(const char * szU8);
+	void NextQuestion();	//更换下一个问题
+	void ShowQuestion(int x, int y);	//显示问题
+	void ShowOutOfQuestion(int x, int y);	//显示问题答完
+	std::vector<std::wstring> ws_spilt(const std::wstring & in, const std::wstring & delim);	//wstring分隔字符串
+	void JudgeBtnClick(button * btn);
 };
 
 #endif // !TETRIS_H
+
+
 
 
 

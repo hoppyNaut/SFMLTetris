@@ -1,7 +1,7 @@
 #include "SFMLTetris.h"
 #include<iostream>
 
-sf::RenderWindow window(sf::VideoMode(STAGE_WIDTH * GRIDSIZE + INFO_WIDTH, STAGE_HEIGHT * GRIDSIZE), L"SFML 俄罗斯方块");
+sf::RenderWindow window(sf::VideoMode(STAGE_WIDTH * GRIDSIZE * 2 + INFO_WIDTH, STAGE_HEIGHT * GRIDSIZE), L"SFML 俄罗斯方块");
 
 SFMLTetris::SFMLTetris()
 {
@@ -20,11 +20,26 @@ int SFMLTetris::GetRand(int min, int max)
 void SFMLTetris::Initial()
 {
 	srand((unsigned int)time(0));		//生成随机数种子
+	LoadXmlFile();
+
+	questionIndex = 0;
+	curQuestion = questionArray[questionIndex];
+	curAnswer = curQuestion.answer;
+	awardCount = 0;
+
+	//printf("%s", questionArray[i].quesTxt);
+	cout << curQuestion.quesTxt << endl;
+	cout << curQuestion.optionA << endl;
+	cout << curQuestion.optionB << endl;
+	cout << curQuestion.optionC << endl;
+	cout << curQuestion.optionD << endl;
+	cout << curQuestion.answer << endl;
+
 
 	//数据初始化
 	score = 0;
 	scoreCount = 1;
-	frameRate = 30;
+	frameRate = 25;
 	delay = 0;
 	timeCounter = 0;
 	gameOver = false;
@@ -46,6 +61,14 @@ void SFMLTetris::Initial()
 			{
 				box_map[i][j] = 0;
 			}
+		}
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			box_Right[i][j] = 0;
 		}
 	}
 
@@ -106,6 +129,21 @@ void SFMLTetris::LoadMediaData()
 	spBackground.setTexture(tBackground);
 	spBackground.setScale(BGSCALEX, BGSCALEY);
 
+	//加载奖励纹理图片
+	if (!tAward.loadFromFile(textureAwardPath))
+	{
+		std::cout << "图片" + textureAwardPath + "没有找到" << endl;
+	}
+	spAward.setTexture(tAward);
+	spAward.setScale(0.4, 0.4);
+
+	if (!tAwardGray.loadFromFile(textureAwardGrayPath))
+	{
+		std::cout << "图片" + textureAwardGrayPath + "没有找到" << endl;
+	}
+	spAwardGray.setTexture(tAwardGray);
+	spAwardGray.setScale(0.4, 0.4);
+
 	//加载音乐
 	if (!sbDrop.loadFromFile("Audios/Drop1.ogg"))
 	{
@@ -114,6 +152,14 @@ void SFMLTetris::LoadMediaData()
 	if (!sbAppear.loadFromFile("Audios/Appear1.ogg"))
 	{
 		std::cout << "Appear1.ogg没有找到" << std::endl;
+	}
+	if (!sbClickCorrect.loadFromFile("Audios/correct.ogg"))
+	{
+		std::cout << "correct.ogg没有找到" << std::endl;
+	}
+	if (!sbClickFalse.loadFromFile("Audios/false.ogg"))
+	{
+		std::cout << "false.ogg没有找到" << std::endl;
 	}
 	if (!bgMusic.openFromFile("Audios/bgMusic.ogg"))
 	{
@@ -126,6 +172,13 @@ void SFMLTetris::LoadMediaData()
 
 	soundDrop.setBuffer(sbDrop);
 	soundAppear.setBuffer(sbAppear);
+	soundClickCorrect.setBuffer(sbClickCorrect);
+	soundClickFalse.setBuffer(sbClickFalse);
+
+	btn_optionA = new button(1080.0f, 550.0f, 100.0f, 60.0f, font, "A", 30, Color(196, 196, 196, 255), Color(119, 119, 119, 255), Color(0, 0, 0, 255), Color(0, 0, 0, 255), 1);
+	btn_optionB = new button(1310.0f, 550.0f, 100.0f, 60.0f, font, "B", 30, Color(196, 196, 196, 255), Color(119, 119, 119, 255), Color(0, 0, 0, 255), Color(0, 0, 0, 255), 2);
+	btn_optionC = new button(1080.0f, 635.0f, 100.0f, 60.0f, font, "C", 30, Color(196, 196, 196, 255), Color(119, 119, 119, 255), Color(0, 0, 0, 255), Color(0, 0, 0, 255), 3);
+	btn_optionD = new button(1310.0f, 635.0f, 100.0f, 60.0f, font, "D", 30, Color(196, 196, 196, 255), Color(119, 119, 119, 255), Color(0, 0, 0, 255), Color(0, 0, 0, 255), 4);
 }
 
 void SFMLTetris::Draw()
@@ -135,14 +188,33 @@ void SFMLTetris::Draw()
 	spBackground.setPosition(0, 0);
 	window.draw(spBackground);
 
+	DrawAward();
 	Prompt_info(width * GRIDSIZE, GRIDSIZE);
 
+	if (curWQuestion.answer != -1)
+	{
+		DrawBtn();
+		ShowQuestion(1050, 100);
+	}
+	else
+	{
+		ShowOutOfQuestion(1080, 200);
+	}
+	
 
 	for(int i = 0; i < width; i++)
 		for (int j = 0; j < height; j++)
 		{
 			if (box_map[j][i] > 0)
 			{
+				if (box_map[j][i] == 1)
+				{
+					//绘制右侧游戏框
+					Sprite curSprite = spArray[box_map[j][i] - 1];
+					curSprite.setPosition(i * GRIDSIZE + GRIDSIZE * STAGE_WIDTH + INFO_WIDTH, j * GRIDSIZE);
+					window.draw(curSprite);
+				}
+
 				Sprite curSprite = spArray[box_map[j][i] - 1];
 				curSprite.setPosition(i * GRIDSIZE, j * GRIDSIZE);
 				window.draw(curSprite);
@@ -183,23 +255,26 @@ void SFMLTetris::Input()
 	{
 		if (event.type == sf::Event::Closed)
 			window.close();
+
+		ButtonInput(event);
+
 		//上
-		if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Up)
+		if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::W)
 		{
 			dir = UP;
 		}
 		//下
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Down)
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S)
 		{
 			dir = DOWN;
 		}
 		//左
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Left)
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
 		{
 			dir = LEFT;
 		}
 		//右
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Right)
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
 		{
 			dir = RIGHT;
 		}
@@ -208,34 +283,23 @@ void SFMLTetris::Input()
 		{
 			gameOver = true;
 		}
-
 		ControlMusic(bgMusic, event);
-		////提高\降低音量
-		//if (event.type == sf::Event::EventType::KeyReleased && event.key.code == sf::Keyboard::Add)
-		//{
-		//	soundVolume += 5;
-		//	bgMusic.setVolume(soundVolume);
-		//}
-		//if (event.type == sf::Event::EventType::KeyReleased && event.key.code == sf::Keyboard::Subtract)
-		//{
-		//	soundVolume -= 5;
-		//	bgMusic.setVolume(soundVolume);
-		//}
-		////开启\关闭音乐
-		//if (event.type == sf::Event::EventType::KeyReleased && (event.key.code == sf::Keyboard::Enter || event.key.code == sf::Keyboard::Multiply))
-		//{
-		//	if (musicOn)
-		//	{
-		//		bgMusic.stop();
-		//		musicOn = false;
-		//	}
-		//	else
-		//	{
-		//		bgMusic.play();
-		//		musicOn = true;
-		//	}
-		//}
 	}
+}
+
+void SFMLTetris::ButtonInput(sf::Event event)
+{
+	//监听按钮按下
+	Vector2i mousePosition(event.mouseButton.x, event.mouseButton.y);
+	btn_optionA->update(mousePosition,event);
+	btn_optionB->update(mousePosition,event);
+	btn_optionC->update(mousePosition, event);
+	btn_optionD->update(mousePosition, event);
+
+	JudgeBtnClick(btn_optionA);
+	JudgeBtnClick(btn_optionB);
+	JudgeBtnClick(btn_optionC);
+	JudgeBtnClick(btn_optionD);
 }
 
 void SFMLTetris::Logic()
@@ -309,6 +373,8 @@ void SFMLTetris::Logic()
 		Score_Next();
 	}
 }
+
+
 
 void SFMLTetris::Prompt_info(int x, int y)
 {
@@ -471,15 +537,6 @@ void SFMLTetris::SetShape(int & cshape, int shape[][4], int & size_w, int & size
 	head_x = width / 2;
 	head_y = 0;
 
-	//将方块映射到数组中
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	for (int j = 0; j < 4; j++)
-	//	{
-	//		box_map[head_x + j][head_y + i] = shape[j][i];
-	//	}
-	//}
-
 	//越界
 	if (IsAggin())
 	{
@@ -624,7 +681,7 @@ void SFMLTetris::Score_Next()
 	score += 10;
 	Judge();
 
-	if (score >= scoreCount * 200 )
+	if (score >= scoreCount * 500 )
 	{
 		scoreCount++;
 		if (frameRate < 50)
@@ -654,29 +711,107 @@ void SFMLTetris::ShowNext(int x,int y)
 		{
 			if (next_box_shape[i][j] == 1)
 			{
-				/*switch (next_color)
-				{
-				case WHITE:
-					spWhite.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
-					window.draw(spWhite);
-					break;
-				case RED:
-					spRed.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
-					window.draw(spRed);
-					break;
-				case GREEN:
-					spGreen.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
-					window.draw(spGreen);
-					break;
-				default:
-					break;
-				}*/
 				Sprite nextSprite = spArray[next_color - 1];
 				nextSprite.setPosition(x + j * GRIDSIZE, y + i * GRIDSIZE);
 				window.draw(nextSprite);
 			}
 		}
 }
+
+void SFMLTetris::EliminateRandRow()
+{
+	soundAppear.play();
+	//不为空的行数
+	int rowCount = 0;
+	for (int i = STAGE_HEIGHT - 2; i >= 2; i--)
+	{
+		//如果当前行为非空行
+		if (!Exsqr(i))
+		{
+			rowCount++;
+		}
+		//如果是空行就跳出循环
+		else
+		{
+			break;
+		}
+	}
+	if (rowCount <= 0)
+	{
+		return;
+	}
+	//生成随机数
+	int randRow = GetRand(0, rowCount - 1);
+	for (int j = 1; j < STAGE_WIDTH - 1; j++)
+	{
+		box_map[STAGE_HEIGHT - 2 - randRow][j] = 0;
+	}
+	for (int i = STAGE_HEIGHT - 2; i >= 2; i--)
+	{
+		int s = i;
+		//如果当前行为空行
+		if (Exsqr(i))
+		{
+			//往上搜索下一个非空行
+			while (s > 1 && Exsqr(--s));
+			for (int j = 1; j < STAGE_WIDTH - 1; j++)
+			{
+				box_map[i][j] = box_map[s][j];
+				box_map[s][j] = 0;
+			}
+		}
+	}
+}
+
+void SFMLTetris::EliminateLongestRow()
+{
+	soundAppear.play();
+	int index = STAGE_WIDTH - 2;
+	int maxCount = 0;
+	int count = 0;
+	for(int i = STAGE_HEIGHT - 2; i >= 2; i--)
+	{
+		if (!Exsqr(i))
+		{
+			for (int j = 1; j < STAGE_WIDTH - 1; j++)
+			{
+				if (box_map[i][j] != 0)
+				{
+					count++;
+				}
+			}
+			if (count > maxCount)
+			{
+				maxCount = count;
+				index = i;
+			}
+			count = 0;
+		}
+		else {
+			break;
+		}
+	}
+	for (int j = 1; j < STAGE_WIDTH - 1; j++)
+	{
+		box_map[index][j] = 0;
+	}
+	for (int i = STAGE_HEIGHT - 2; i >= 2; i--)
+	{
+		int s = i;
+		//如果当前行为空行
+		if (Exsqr(i))
+		{
+			//往上搜索下一个非空行
+			while (s > 1 && Exsqr(--s));
+			for (int j = 1; j < STAGE_WIDTH - 1; j++)
+			{
+				box_map[i][j] = box_map[s][j];
+				box_map[s][j] = 0;
+			}
+		}
+	}
+}
+
 
 void SFMLTetris::ShowGameOverInfo(int x, int y)
 {
@@ -710,6 +845,31 @@ void SFMLTetris::ShowSpeedUpInfo(int x, int y)
 
 }
 
+void SFMLTetris::DrawBtn()
+{
+	btn_optionA->render(window);
+	btn_optionB->render(window);
+	btn_optionC->render(window);
+	btn_optionD->render(window);
+}
+
+void SFMLTetris::DrawAward()
+{
+	for (int i = 0; i < 3; i++)
+	{
+		if (i < awardCount)
+		{
+			spAward.setPosition(STAGE_WIDTH * GRIDSIZE + 50 + 150 * i, STAGE_HEIGHT * GRIDSIZE - 200);
+			window.draw(spAward);
+		}
+		else
+		{
+			spAwardGray.setPosition(STAGE_WIDTH * GRIDSIZE + 50 + 150 * i, STAGE_HEIGHT * GRIDSIZE - 200);
+			window.draw(spAwardGray);
+		}
+	}
+}
+
 void SFMLTetris::ControlMusic(Music &music,sf::Event event)
 {
 	//提高\降低音量
@@ -736,6 +896,316 @@ void SFMLTetris::ControlMusic(Music &music,sf::Event event)
 			music.play();
 			musicOn = true;
 		}
+	}
+}
+
+bool SFMLTetris::LoadXmlFile()
+{
+	TiXmlDocument doc;
+	if (!doc.LoadFile("questions.xml"))
+	{
+		cout << doc.ErrorDesc() << endl;
+		return false;
+	}
+
+	TiXmlElement * root = doc.FirstChildElement();
+	if (root == NULL)
+	{
+		cout << "Failed to load file：No root element" << endl;
+		//清理内存
+		doc.Clear();
+		return false;
+	}
+
+	//遍历子节点
+	for (TiXmlElement * elem = root->FirstChildElement(); elem != NULL; elem = elem->NextSiblingElement())
+	{
+		Question question;
+		//TODO
+		WQuestion wquestion;
+		//获取元素名
+		string elemName = elem->Value();
+		string attr;
+		//获取元素属性值
+		attr = elem->Attribute("ID");
+		int index = atoi(attr.c_str());
+		//再次遍历子属性结点
+		for (TiXmlElement *node = elem->FirstChildElement(); node != NULL; node = node->NextSiblingElement())
+		{
+			string nodeName = node->Value();
+			TiXmlNode* node2 = node->FirstChild();
+			//cout << node->GetText() << endl;
+			if (nodeName.compare("question") == 0)
+			{
+				question.quesTxt = Utf8ToUnicode(node2->ToText()->Value());
+				//TODO
+				wquestion.quesTxt = Utf8ToUnicodeW(node2->ToText()->Value());
+			}
+			else if (nodeName.compare("optionA") == 0)
+			{
+				question.optionA = Utf8ToUnicode( node2->ToText()->Value());
+				//TODO
+				wquestion.optionA = Utf8ToUnicodeW(node2->ToText()->Value());
+			}
+			else if (nodeName.compare("optionB") == 0)
+			{
+				question.optionB = Utf8ToUnicode(node2->ToText()->Value());
+				//TODO
+				wquestion.optionB = Utf8ToUnicodeW(node2->ToText()->Value());
+			}
+			else if (nodeName.compare("optionC") == 0)
+			{
+				question.optionC = Utf8ToUnicode(node2->ToText()->Value());
+				//TODO
+				wquestion.optionC = Utf8ToUnicodeW(node2->ToText()->Value());
+			}
+			else if (nodeName.compare("optionD") == 0)
+			{
+				question.optionD = Utf8ToUnicode(node2->ToText()->Value());
+				//TODO
+				wquestion.optionD = Utf8ToUnicodeW(node2->ToText()->Value());
+			}
+			else if (nodeName.compare("answer") == 0)
+			{
+				question.answer = atoi(node2->ToText()->Value());
+				//TODO
+				wquestion.answer = atoi(node2->ToText()->Value());
+			};
+		}
+		questionArray[index] = question;
+		wquestionArray[index] = wquestion;
+	}
+
+	return true;
+}
+
+string SFMLTetris::Utf8ToUnicode(const char * szU8)
+{
+	//预转换，得到所需空间的大小;
+	int wcsLen = ::MultiByteToWideChar(CP_UTF8, NULL, szU8, strlen(szU8), NULL, 0);
+
+	//分配空间要给'\0'留个空间，MultiByteToWideChar不会给'\0'空间
+	wchar_t* wszString = new wchar_t[wcsLen + 1];
+
+	//转换
+	MultiByteToWideChar(CP_UTF8, NULL, szU8, strlen(szU8), wszString, wcsLen);
+
+	//最后加上'\0'
+	wszString[wcsLen] = '\0';
+
+	string unicodeString = Wchar_tToString(wszString);
+
+	delete[] wszString;
+	wszString = NULL;
+
+	return unicodeString;
+}
+
+string SFMLTetris::Wchar_tToString(wchar_t * wchar)
+{
+	wchar_t * wText = wchar;
+	DWORD dwNum = WideCharToMultiByte(CP_OEMCP, NULL, wText, -1, NULL, 0, NULL, FALSE);// WideCharToMultiByte的运用
+	char *psText; // psText为char*的临时数组，作为赋值给std::string的中间变量
+	psText = new char[dwNum];
+	WideCharToMultiByte(CP_OEMCP, NULL, wText, -1, psText, dwNum, NULL, FALSE);// WideCharToMultiByte的再次运用
+	string szDst = psText;// std::string赋值
+	delete[]psText;// psText的清除
+	return szDst;
+}
+
+wstring SFMLTetris::Utf8ToUnicodeW(const char * szU8)
+{
+	//预转换，得到所需空间的大小;
+	int wcsLen = ::MultiByteToWideChar(CP_UTF8, NULL, szU8, strlen(szU8), NULL, 0);
+
+	//分配空间要给'\0'留个空间，MultiByteToWideChar不会给'\0'空间
+	wchar_t* wszString = new wchar_t[wcsLen + 1];
+
+	//转换
+	MultiByteToWideChar(CP_UTF8, NULL, szU8, strlen(szU8), wszString, wcsLen);
+
+	//最后加上'\0'
+	wszString[wcsLen] = '\0';
+
+	wstring unicodeString(wszString);
+
+	delete[] wszString;
+	wszString = NULL;
+
+	return unicodeString;
+}
+
+void SFMLTetris::NextQuestion()
+{
+	questionIndex++;
+	curQuestion = questionArray[questionIndex];
+	curWQuestion = wquestionArray[questionIndex];
+	curAnswer = curQuestion.answer;
+
+	cout << curQuestion.quesTxt << endl;
+	cout << curQuestion.optionA << endl;
+	cout << curQuestion.optionB << endl;
+	cout << curQuestion.optionC << endl;
+	cout << curQuestion.optionD << endl;
+	cout << curQuestion.answer << endl;
+	//TODO 更换显示
+}
+
+void SFMLTetris::ShowQuestion(int x, int y)
+{
+	int initialX = 20, initialY = 0;
+	int CharacterSize = 30;
+	//设置字体大小、颜色、风格
+	text.setCharacterSize(CharacterSize);
+	text.setFillColor(Color(255, 255, 255, 255));
+	text.setStyle(Text::Bold);
+
+	//按照分隔符分隔宽字符串，进行换行
+	std::vector<wstring> ws_result = ws_spilt(wquestionArray[questionIndex].quesTxt, L"[|]");
+	//std::copy(ws_result.begin(), ws_result.end(), std::ostream_iterator<std::wstring, std::wstring::value_type>(std::wcout, L"\n"));
+	//cout << ws_result.size() << endl;
+
+	for (int i = 0; i < ws_result.size(); i++)
+	{
+		text.setPosition(x + initialX, y + initialY);
+		text.setString(ws_result[i]);
+		window.draw(text);
+		initialY += CharacterSize;
+	}
+
+	initialY += CharacterSize / 2;
+
+	ws_result = ws_spilt(wquestionArray[questionIndex].optionA, L"[|]");
+
+	for (int i = 0; i < ws_result.size(); i++)
+	{
+		text.setPosition(x + initialX, y + initialY);
+		text.setString(ws_result[i]);
+		window.draw(text);
+		initialY += CharacterSize;
+	}
+
+	initialY += CharacterSize / 2;
+
+	ws_result = ws_spilt(wquestionArray[questionIndex].optionB, L"[|]");
+
+	for (int i = 0; i < ws_result.size(); i++)
+	{
+		text.setPosition(x + initialX, y + initialY);
+		text.setString(ws_result[i]);
+		window.draw(text);
+		initialY += CharacterSize;
+	}
+
+	initialY += CharacterSize / 2;
+
+	ws_result = ws_spilt(wquestionArray[questionIndex].optionC, L"[|]");
+
+	for (int i = 0; i < ws_result.size(); i++)
+	{
+		text.setPosition(x + initialX, y + initialY);
+		text.setString(ws_result[i]);
+		window.draw(text);
+		initialY += CharacterSize;
+	}
+
+	initialY += CharacterSize / 2;
+
+	ws_result = ws_spilt(wquestionArray[questionIndex].optionD, L"[|]");
+
+	for (int i = 0; i < ws_result.size(); i++)
+	{
+		text.setPosition(x + initialX, y + initialY);
+		text.setString(ws_result[i]);
+		window.draw(text);
+		initialY += CharacterSize;
+	}
+
+}
+
+
+void SFMLTetris::ShowOutOfQuestion(int x, int y)
+{
+	int initialX = 20, initialY = 0;
+	int CharacterSize = 30;
+	//设置字体大小、颜色、风格
+	text.setCharacterSize(CharacterSize);
+	text.setFillColor(Color(255, 255, 255, 255));
+	text.setStyle(Text::Bold);
+
+	text.setPosition(x + initialX, y + initialY);
+	text.setString(L"       恭喜你!");
+	window.draw(text);
+
+	initialY += CharacterSize + CharacterSize / 2;
+
+	text.setPosition(x + initialX, y + initialY);
+	text.setString(L"已经答完所有题目！！");
+	window.draw(text);
+
+	initialY += CharacterSize + CharacterSize / 2;
+	
+	text.setPosition(x + initialX, y + initialY);
+	text.setString(L"题库正在扩充中......");
+	window.draw(text);
+
+	initialY += CharacterSize + CharacterSize / 2;
+
+	text.setPosition(x + initialX, y + initialY);
+	text.setString(L"     敬请期待");
+	window.draw(text);
+
+}
+
+std::vector<std::wstring> SFMLTetris::ws_spilt(const std::wstring & in, const std::wstring & delim)
+{
+	std::wregex re{ delim };
+	return std::vector<std::wstring>{
+		std::wsregex_token_iterator(in.begin(), in.end(), re, -1),
+		std::wsregex_token_iterator()
+	};
+}
+
+void SFMLTetris::JudgeBtnClick(button * btn)
+{
+	if (btn->isClick)
+	{
+		btn->isClick = false;
+		cout << "Button " << btn->Getid() << " Clicked" << endl;
+
+		if (btn->Getid() == curAnswer)
+		{
+			soundClickCorrect.play();
+			NextQuestion();
+			cout << "Corret" << endl;
+			if (awardCount < 3)
+			{
+				awardCount++;
+				if (awardCount == 3)
+				{
+					awardCount = 0;
+					EliminateRandRow();
+				}
+			}
+		}
+		else
+		{
+			soundClickFalse.play();
+			NextQuestion();
+			cout << "False" << endl;
+			if (awardCount > 0)
+			{
+				awardCount--;
+			}
+			else
+			{
+				if (score >= 20)
+				{
+					score -= 20;
+				}
+			}
+		}
+
 	}
 }
 
