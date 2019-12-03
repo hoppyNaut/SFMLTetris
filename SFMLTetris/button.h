@@ -11,7 +11,8 @@ class button
 	
 public:
 	button(float x, float y, float width, float height,
-		   sf::Font font, std::string msg, unsigned int character_size,
+		   sf::Font font, std::wstring msg, unsigned int character_size,
+			int offsetX ,int offsetY,
 		   sf::Color idle_color, sf::Color pressed_color,
 		   sf::Color textedle_color, sf::Color textpressed_color,
 		   short unsigned id);
@@ -20,6 +21,8 @@ public:
 	bool isClick;
 	const bool is_pressed() const;
 	const std::string Gettxt() const;
+	sf::Text GetText();
+	sf::RectangleShape GetShape();
 	const short unsigned Getid() const;
 	//setting
 	void Settxt(const std::string txt);

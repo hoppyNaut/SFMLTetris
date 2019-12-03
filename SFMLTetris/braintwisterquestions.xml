@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<Item ID = "0">
+		<question>1.脑筋急转弯（）</question>
+		<optionA>A.好</optionA>
+		<optionB>B.很好</optionB>
+		<optionC>C.非常好</optionC>
+		<optionD>D.贼J2好</optionD>
+		<answer>1</answer>
+	</Item>
+	<Item ID = "1">
+		<question>2.What is Your Age（）</question>
+		<optionA>A.ten years old</optionA>
+		<optionB>B.eleven years old</optionB>
+		<optionC>C.five years old</optionC>
+		<optionD>D.eight years old</optionD>
+		<answer>3</answer>
+	</Item>
+	<Item ID = "2">
+		<question>3.对于循环队列，下列叙述|中正确的是（）</question>
+		<optionA>A.队头指针是固定不变的</optionA>
+		<optionB>B.队头指针一定大于队尾|指针</optionB>
+		<optionC>C.队头指针一定小于队尾|指针</optionC>
+		<optionD>D.队头指针可以大于队尾|指针，也可以小于队尾指针</optionD>
+		<answer>-1</answer>
+	</Item>
+
+</root>

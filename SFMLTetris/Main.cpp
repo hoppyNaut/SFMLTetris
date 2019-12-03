@@ -1,7 +1,7 @@
-#include"SFMLTetris.h"
+#include"Game.h"
 
 int main()
 {
-	SFMLTetris Tetris;
-	Tetris.GameLoop();
+	Game game;
+	game.GameLoop();
 }

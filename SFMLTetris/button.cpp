@@ -4,7 +4,8 @@
 
 
 button::button(float x, float y, float width, float height,
-	sf::Font font,std::string msg, unsigned int character_size,
+	sf::Font font,std::wstring msg, unsigned int character_size,
+	int offsetX, int offsetY,
 	sf::Color idle_color, sf::Color pressed_color,
 	sf::Color textidle_color, sf::Color textpressed_color,
 	short unsigned id)
@@ -35,8 +36,8 @@ button::button(float x, float y, float width, float height,
 	this->text.setFillColor(textidle_color);
 	this->text.setStyle(Text::Bold);
 	this->text.setPosition(
-		this->shape.getPosition().x + (this->shape.getGlobalBounds().width / 2.f) - this->text.getGlobalBounds().width / 2.f - 10,
-		this->shape.getPosition().y+ this->text.getGlobalBounds().height / 2.f + 10
+		this->shape.getPosition().x + (this->shape.getGlobalBounds().width / 2.f) - this->text.getGlobalBounds().width / 2.f - 10 + offsetX,
+		this->shape.getPosition().y+ this->text.getGlobalBounds().height / 2.f + 10 + offsetY
 	);
 	this->text.setString(msg);
 
@@ -57,6 +58,16 @@ const bool button::is_pressed() const
 const std::string button::Gettxt() const
 {
 	return this->text.getString();
+}
+
+sf::Text button::GetText()
+{
+	return text;
+}
+
+sf::RectangleShape button::GetShape()
+{
+	return shape;
 }
 
 const short unsigned button::Getid() const

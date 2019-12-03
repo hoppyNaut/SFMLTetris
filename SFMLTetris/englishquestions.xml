@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<Item ID = "0">
+		<question>1.His mother wants him |____ at home today.</question>
+		<optionA>A.stays</optionA>
+		<optionB>B.stayed</optionB>
+		<optionC>C.to stay</optionC>
+		<optionD>D.staying</optionD>
+		<answer>3</answer>
+	</Item>
+	<Item ID = "1">
+		<question>2.Good ____ habits help|me get good grades.</question>
+		<optionA>A.eating</optionA>
+		<optionB>B.eat</optionB>
+		<optionC>C.ate</optionC>
+		<optionD>D.eatting</optionD>
+		<answer>1</answer>
+	</Item>
+	<Item ID = "2">
+		<question>3.Is her watch ____ yours|or different?</question>
+		<optionA>A.the same</optionA>
+		<optionB>B.the same as</optionB>
+		<optionC>C.same as</optionC>
+		<optionD>D.the same to</optionD>
+		<answer>2</answer>
+	</Item>
+	<Item ID = "3">
+		<question>4.There's ____. That's|____ nice.</question>
+		<optionA>A.to much; too much</optionA>
+		<optionB>B.much too; much too</optionB>
+		<optionC>C.Much too; too much</optionC>
+		<optionD>D.too much; much too</optionD>
+		<answer>4</answer>
+	</Item>
+		<Item ID = "4">
+		<question>5.It took ____ to do my homework.</question>
+		<optionA>A.me an hour half</optionA>
+		<optionB>B.me half an hour</optionB>
+		<optionC>C.me half a hour</optionC>
+		<optionD>D.me a half hour</optionD>
+		<answer>2</answer>
+	</Item>
+	<Item ID = "5">
+		<question>3.对于循环队列，下列叙述|中正确的是（）</question>
+		<optionA>A.队头指针是固定不变的</optionA>
+		<optionB>B.队头指针一定大于队尾|指针</optionB>
+		<optionC>C.队头指针一定小于队尾|指针</optionC>
+		<optionD>D.队头指针可以大于队尾|指针，也可以小于队尾指针</optionD>
+		<answer>-1</answer>
+	</Item>
+
+</root>
